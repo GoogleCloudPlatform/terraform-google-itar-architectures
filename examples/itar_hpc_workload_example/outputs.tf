@@ -13,10 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-module "itar_architectures" {
-  source = "../.."
-
-  project_id  = var.project_id
-  bucket_name = var.bucket_name
-}

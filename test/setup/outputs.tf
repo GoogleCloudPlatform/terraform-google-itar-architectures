@@ -22,3 +22,11 @@ output "sa_key" {
   value     = google_service_account_key.int_test.private_key
   sensitive = true
 }
+
+output "assured_workload_folder_id" {
+  value = local.assured_workload_folder_id
+}
+
+output "assured_workload_cmek_project_id" {
+  value = local.assured_workload_cmek_project_id
+}

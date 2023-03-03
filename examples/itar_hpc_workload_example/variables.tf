@@ -15,11 +15,11 @@
  */
 
 variable "project_id" {
-  description = "The project ID to deploy to"
+  description = "The ID of the project in which to provision resources."
   type        = string
 }
 
-variable "bucket_name" {
-  description = "The name of the bucket to create"
+variable "assured_workload_cmek_project_id" {
+  description = "The ID of the Encryption Key project created by Assured Workloads."
   type        = string
 }
