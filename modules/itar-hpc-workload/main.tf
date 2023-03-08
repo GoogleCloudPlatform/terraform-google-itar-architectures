@@ -33,16 +33,16 @@ module "storage_kms" {
 }
 
 # The code is for creating  gcs buckets with locational endpoints
-module "gcs_locational_endpoints" {
-  source             = "../gcs-locational-endpoints"
-  project_id         = var.project_id
-  location_endpoint  = var.gcs_location
-  gcs_kms_ring_name  = module.storage_kms.keyring_name
-  gcs_kms_key_name   = keys(module.storage_kms.keys)[0]
-  input_bucket_name  = var.input_bucket_name
-  output_bucket_name = var.output_bucket_name
-  lifecycle_file     = var.bucket_lifecycle_file
-}
+# module "gcs_locational_endpoints" {
+#   source             = "../gcs-locational-endpoints"
+#   project_id         = var.project_id
+#   location_endpoint  = var.gcs_location
+#   gcs_kms_ring_name  = module.storage_kms.keyring_name
+#   gcs_kms_key_name   = keys(module.storage_kms.keys)[0]
+#   input_bucket_name  = var.input_bucket_name
+#   output_bucket_name = var.output_bucket_name
+#   lifecycle_file     = var.bucket_lifecycle_file
+# }
 
 module "gce_kms" {
   source  = "terraform-google-modules/kms/google"
