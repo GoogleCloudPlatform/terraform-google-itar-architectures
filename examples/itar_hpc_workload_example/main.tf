@@ -26,14 +26,14 @@ module "itar_hpc_workload" {
     {
       subnet_name           = "hpc-subnet-01"
       subnet_ip             = "10.10.10.0/24"
-      subnet_region         = "us-central1"
+      subnet_region         = var.region
       subnet_private_access = "true"
       subnet_flow_logs      = "true"
     },
     {
       subnet_name           = "hpc-subnet-02"
       subnet_ip             = "10.10.20.0/24"
-      subnet_region         = "us-central1"
+      subnet_region         = var.region
       subnet_private_access = "true"
       subnet_flow_logs      = "true"
     },
@@ -45,21 +45,27 @@ module "itar_hpc_workload" {
     {
       subnet_name           = "dmz-subnet-01"
       subnet_ip             = "10.10.30.0/24"
-      subnet_region         = "us-central1"
+      subnet_region         = var.region
       subnet_private_access = "true"
       subnet_flow_logs      = "true"
     }
   ]
 
-  region                   = "us-central1"
-  db_instance_name         = "postgres-vm"
-  db_disk_size_gb          = "50"
-  db_machine_type          = "n2d-standard-4"
-  db_num_instances         = "1"
-  db_source_image          = "ubuntu-2004-lts"
-  db_source_image_project  = "ubuntu-os-cloud"
-  db_zone                  = "us-central1-b"
-  db_deletion_protection   = false
+  region = var.region
+
+  # DB VM
+  db_instance_name        = "postgres-vm"
+  db_disk_size_gb         = "50"
+  db_machine_type         = "n2d-standard-4"
+  db_num_instances        = "1"
+  db_source_image         = "ubuntu-2004-lts"
+  db_source_image_project = "ubuntu-os-cloud"
+  db_zone                 = "us-central1-b"
+  db_deletion_protection  = false
+  db_instance_prefix      = "itar-postgress-template-"
+  db_tags                 = ["db-vm"]
+
+  # DMZ VM
   dmz_instance_prefix      = "itar"
   dmz_instance_name        = "dmz-vm"
   dmz_disk_size_gb         = "50"
@@ -70,6 +76,8 @@ module "itar_hpc_workload" {
   dmz_source_image_project = "ubuntu-os-cloud"
   dmz_zone                 = "us-central1-b"
   dmz_deletion_protection  = false
+
+  # HPC VM
   hpc_zone                 = null
   hpc_instance_prefix      = "itar-hpc-vm-template-"
   hpc_tags                 = ["hpc-vm"]
@@ -80,55 +88,45 @@ module "itar_hpc_workload" {
   hpc_source_image         = "hpc-centos-7"
   hpc_source_image_project = "cloud-hpc-image-public"
   hpc_deletion_protection  = false
-  sa_prefix                = "itar"
-  iap_name                 = "iap-firewall"
-  iap_zone                 = "us-central1-b"
-  iap_members              = ["serviceAccount:169752266853-compute@developer.gserviceaccount.com", "user:mmasooduddin@assuredworkloadsfortesting.com"] // keep in this format change email addresses
+
+  sa_prefix   = "itar"
+  iap_name    = "iap-firewall"
+  iap_zone    = "us-central1-b"
+  iap_members = []
   # bucket_prefix            = "itar"
-  db_instance_prefix       = "itar-postgress-template-"
-  db_tags                  = ["db-vm"]
+
   key_rotation_period = "7776000s"
-  key_ring_location   = "us-central1"
-  parent_id           = "468180499708"
+  parent_id           = var.org_id
   policy_name         = "policyvpcsc03"
-  protected_project_ids = {
-    id     = "itar-use-case"
-    number = 169752266853
-  }
+
   perimeter_name                  = "itarperimeter"
   access_level_name               = "access_members"
-  members                         = ["user:mmasooduddin@assuredworkloadsfortesting.com", "serviceAccount:169752266853-compute@developer.gserviceaccount.com"]
-  scopes                          = ["projects/169752266853"]
+  members                         = ["serviceAccount:${var.sa_email}"]
   private_service_connect_name    = "psconnect"
   private_service_connect_ip      = "10.0.1.8"
   private_service_forwarding_rule = "forwardingrulepsc01"
   deny_policy_name                = "denyrule2"
 
   hpc_router_name   = "hpc-itar-router"
-  hpc_router_region = "us-central1"
+  hpc_router_region = var.region
   hpc_nat_name      = "hpc-itar-nat"
 
   dmz_router_name   = "dmz-itar-router"
-  dmz_router_region = "us-central1"
+  dmz_router_region = var.region
   dmz_nat_name      = "dmz-itar-nat"
 
   # KMS variables
-
-  # ipbkt_use_existing_keyring = false
-  # ipbkt_keyring_name         = "kms1-key-ring"
-  # opbkt_use_existing_keyring = true
-  # opbkt_keyring_name         = "kms1-key-ring"
-  hpc_use_existing_keyring   = true
-  # hpc_keyring_name           = "kms1-key-ring"
-  db_use_existing_keyring    = true
-  # db_keyring_name            = "kms1-key-ring"
-  dmz_use_existing_keyring   = true
-  # dmz_keyring_name           = "kms1-key-ring"
-  gce_keyring_name           = "kms1-key-ring"
+  hpc_use_existing_keyring = true
+  hpc_keyring_name         = "kms1-key-ring"
+  db_use_existing_keyring  = true
+  db_keyring_name          = "kms1-key-ring"
+  dmz_use_existing_keyring = true
+  dmz_keyring_name         = "kms1-key-ring"
+  gce_keyring_name         = "kms1-key-ring"
 
   # GCS locational endpoint varaibles
 
-  gcs_location          = "us-central1"
+  gcs_location          = var.region
   gcs_kms_ring_name     = "gcsendpointkr1"
   gcs_kms_key_name      = "gcskey2"
   input_bucket_name     = "hpcinputbucket-ty3"

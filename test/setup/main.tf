@@ -29,8 +29,13 @@ resource "google_assured_workloads_workload" "primary" {
 }
 
 locals {
-  assured_workload_folder_id       = compact([for resource in google_assured_workloads_workload.primary.resources : resource.resource_type == "CONSUMER_FOLDER" ? resource.resource_id : ""])[0]
-  assured_workload_cmek_project_id = compact([for resource in google_assured_workloads_workload.primary.resources : resource.resource_type == "ENCRYPTION_KEYS_PROJECT" ? resource.resource_id : ""])[0]
+  assured_workload_folder_id           = compact([for resource in google_assured_workloads_workload.primary.resources : resource.resource_type == "CONSUMER_FOLDER" ? resource.resource_id : ""])[0]
+  assured_workload_cmek_project_number = compact([for resource in google_assured_workloads_workload.primary.resources : resource.resource_type == "ENCRYPTION_KEYS_PROJECT" ? resource.resource_id : ""])[0]
+}
+
+data "google_projects" "cmek_project" {
+  # filter = "parent.id=${local.assured_workload_folder_id}"
+  filter = "parent.id=${local.assured_workload_folder_id} AND name:cmek*"
 }
 
 module "project" {
@@ -57,6 +62,7 @@ module "project" {
     "domains.googleapis.com",
     "iamcredentials.googleapis.com",
     "iap.googleapis.com",
-    "accesscontextmanager.googleapis.com"
+    "accesscontextmanager.googleapis.com",
+    # "storage.googleapis.com"
   ]
 }

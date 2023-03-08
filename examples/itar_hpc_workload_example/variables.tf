@@ -19,7 +19,23 @@ variable "project_id" {
   type        = string
 }
 
+variable "org_id" {
+  description = "The Google Cloud Organizaiton ID, needed to set up VPC-SC."
+  type        = string
+}
+
+variable "region" {
+  description = "The Cloud region to use"
+  type        = string
+  default     = "us-central1"
+}
+
 variable "assured_workload_cmek_project_id" {
   description = "The ID of the Encryption Key project created by Assured Workloads."
+  type        = string
+}
+
+variable "sa_email" {
+  description = "Deployment service account email, for inclusing in Access Context Manager access level"
   type        = string
 }

@@ -1,3 +1,19 @@
+/**
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 # This generates random suffix that is intended to create a unique service account name 
 resource "random_id" "sa_sufix" {
   byte_length = 8
@@ -12,13 +28,20 @@ data "google_service_account" "existing_account" {
 
 
 #This module will create a new service account for compute engine database and ensure that your VM instance is not associated with the default GCP service account
-module "vm_service_account" {
+# module "vm_service_account" {
+#   count        = var.compute_service_account == "" ? 1 : 0
+#   source       = "../service_account"
+#   account_id   = "sa-${var.sa_prefix}${random_id.sa_sufix.dec}"
+#   display_name = "vm_service_account"
+#   description  = "service account for vm"
+#   project_id   = var.project_id
+# }
+resource "google_service_account" "service_account" {
   count        = var.compute_service_account == "" ? 1 : 0
-  source       = "../service_account"
   account_id   = "sa-${var.sa_prefix}${random_id.sa_sufix.dec}"
-  display_name = "vm_service_account"
-  description  = "service account for vm"
-  project_id   = var.project_id
+  project      = var.project_id
+  display_name = "DB vm_service_account"
+  description  = "service account for DB vm"
 }
 
 #This Updates the IAM policy to grant a role to a new member. The members to which roles are assigned here are either existing service account or new service account created for Compute Engine DB
@@ -28,7 +51,7 @@ resource "google_compute_instance_iam_member" "instance_iam" {
   instance_name = module.compute_instance.instances_self_links[0]
   role          = each.key
   zone          = var.zone
-  member        = var.compute_service_account == "" ? "serviceAccount:${module.vm_service_account[0].email}" : "serviceAccount:${data.google_service_account.existing_account[0].email}"
+  member        = var.compute_service_account == "" ? google_service_account.service_account[0].member : "serviceAccount:${data.google_service_account.existing_account[0].email}"
 }
 
 #Data block for project id
@@ -64,12 +87,14 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 
 #This module will create an instance template which will be used to create compute engine DB. This template enables confidential and shielded security on VM, enables/disables nested virtualization, enable/disables IP forwarding and provide other security controls
 module "instance_template" {
-  source      = "github.com/terraform-google-modules/terraform-google-vm/modules/instance_template"
+  source  = "terraform-google-modules/vm/google//modules/instance_template"
+  version = "~> 8.0.0"
+
   project_id  = var.project_id
   name_prefix = var.instance_prefix
   region      = var.region
   service_account = var.compute_service_account == "" ? ({
-    email  = module.vm_service_account[0].email
+    email  = google_service_account.service_account[0].email
     scopes = []
     }) : ({
     email  = data.google_service_account.existing_account[0].email
@@ -103,7 +128,9 @@ module "instance_template" {
 
 #This module will create the Compute Engine DB virtual machine from instance template and also enables deletion protection functionality on the instance
 module "compute_instance" {
-  source              = "github.com/terraform-google-modules/terraform-google-vm/modules/compute_instance"
+  source  = "terraform-google-modules/vm/google//modules/compute_instance"
+  version = "~> 8.0.0"
+
   instance_template   = module.instance_template.self_link
   hostname            = var.instance_name
   add_hostname_suffix = false

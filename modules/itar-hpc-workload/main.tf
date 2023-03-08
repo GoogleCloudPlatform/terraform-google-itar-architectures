@@ -1,9 +1,23 @@
-#Enables all the required APIs needed for this project
+/**
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# module "enable-apis" {
-#   source     = "./modules/enable_apis"
-#   project_id = var.project_id
-# }
+
+data "google_project" "primary" {
+  project_id = var.project_id
+}
 
 module "storage_kms" {
   source  = "terraform-google-modules/kms/google"
@@ -18,6 +32,18 @@ module "storage_kms" {
   prevent_destroy = var.kms_prevent_destroy
 }
 
+# The code is for creating  gcs buckets with locational endpoints
+module "gcs_locational_endpoints" {
+  source             = "../gcs-locational-endpoints"
+  project_id         = var.project_id
+  location_endpoint  = var.gcs_location
+  gcs_kms_ring_name  = module.storage_kms.keyring_name
+  gcs_kms_key_name   = keys(module.storage_kms.keys)[0]
+  input_bucket_name  = var.input_bucket_name
+  output_bucket_name = var.output_bucket_name
+  lifecycle_file     = var.bucket_lifecycle_file
+}
+
 module "gce_kms" {
   source  = "terraform-google-modules/kms/google"
   version = "2.2.1"
@@ -29,61 +55,22 @@ module "gce_kms" {
   prevent_destroy = var.kms_prevent_destroy
 }
 
-# The code is for creating  gcs buckets with locational endpoints
-module "gcs_input_bucket" {
-  source             = "../gcs-locational-endpoints"
-  project_id         = var.project_id
-  cmek_project_id    = var.cmek_project_id
-  location_endpoint  = var.gcs_location
-  gcs_kms_ring_name  = module.storage_kms.keyring_name
-  gcs_kms_key_name   = keys(module.storage_kms.keys)[0]
-  bucket_name        = var.input_bucket_name
-  lifecycle_file     = var.bucket_lifecycle_file
-}
-
-module "gcs_output_bucket" {
-  source             = "../gcs-locational-endpoints"
-  project_id         = var.project_id
-  cmek_project_id    = var.cmek_project_id
-  location_endpoint  = var.gcs_location
-  gcs_kms_ring_name  = module.storage_kms.keyring_name
-  gcs_kms_key_name   = keys(module.storage_kms.keys)[0]
-  bucket_name        = var.output_bucket_name
-  lifecycle_file     = var.bucket_lifecycle_file
-}
-
 # Create a VPC to deploy the HPC ready vm
-# module "hpc-vpc" {
-#   source           = "./modules/vpc"
-#   project_id       = var.project_id
-#   vpc_network_name = var.hpc_network_name
-#   subnets          = var.hpc_subnets
-#   depends_on       = [module.enable-apis]
-# }
 module "hpc_vpc" {
-  source           = "terraform-google-modules/network/google"
-  version          = "~> 6.0"
-  project_id       = var.project_id
-  network_name     = var.hpc_network_name
-  shared_vpc_host  = false
-  subnets          = var.hpc_subnets
+  source          = "terraform-google-modules/network/google"
+  version         = "~> 6.0"
+  project_id      = var.project_id
+  network_name    = var.hpc_network_name
+  shared_vpc_host = false
+  subnets         = var.hpc_subnets
 }
 
 
 #Create a NAT gateway 
-# module "hpc_nat_gateway" {
-#   source        = "./modules/cloud_nat"
-#   project_id    = var.project_id
-#   router_name   = var.hpc_router_name
-#   network       = module.hpc-vpc.vpc_self_link
-#   router_region = var.hpc_router_region
-#   nat_name      = var.hpc_nat_name
-#   depends_on    = [module.enable-apis, module.hpc-vpc]
-# }
 module "hpc_nat_gateway" {
   source  = "terraform-google-modules/cloud-router/google"
   version = "~> 4.0"
-  project = var.project_id 
+  project = var.project_id
   name    = var.hpc_router_name
   network = module.hpc_vpc.network_self_link
   region  = var.hpc_router_region
@@ -114,9 +101,9 @@ module "hpc_vm" {
   sa_prefix            = var.sa_prefix
   zone                 = var.hpc_zone
   use_existing_keyring = var.hpc_use_existing_keyring
-  keyring_name         = var.hpc_use_existing_keyring ? module.gce_kms.keyring_name : ""
+  keyring_name         = var.hpc_use_existing_keyring ? var.hpc_keyring_name : ""
   key_rotation_period  = var.key_rotation_period
-  depends_on           = [module.hpc_nat_gateway, module.gce_kms]
+  depends_on           = [module.hpc_nat_gateway]
 }
 
 # Deploy Confidential Postgress SQL VM
@@ -139,38 +126,16 @@ module "compute_engine_database_primary" {
   network              = module.hpc_vpc.network_self_link
   subnetwork           = module.hpc_vpc.subnets_names[1]
   use_existing_keyring = var.db_use_existing_keyring
-  keyring_name         = var.db_use_existing_keyring ? module.gce_kms.keyring_name : ""
+  keyring_name         = var.db_use_existing_keyring ? var.db_keyring_name : ""
   key_rotation_period  = var.key_rotation_period
-  depends_on           = [module.hpc_nat_gateway, module.gce_kms]
+  depends_on           = [module.hpc_nat_gateway]
 }
 
 #Enable firewall rules that allow users to access HPC VM and Postgress
-# module "firewall-allow-db" {
-#   source       = "./modules/firewall_rules"
-#   project_id   = var.project_id
-#   network_name = module.hpc-vpc.vpc_self_link
-#   rules = [
-#     {
-#       name                    = "hpc-firewall01"
-#       description             = "hpc firewall rules"
-#       direction               = "INGRESS"
-#       source_tags             = ["hpc-vm"]
-#       target_tags             = ["db-vm"]
-#       source_service_accounts = null
-#       target_service_accounts = null
-#       priority                = null
-#       ranges                  = null
-#       deny                    = []
-#       allow = [{
-#         protocol = "tcp"
-#         ports    = ["5432"]
-#       }]
-#       log_config = null
-#   }]
-#   depends_on = [module.compute_engine_database_primary]
-# }
 module "firewall_allow_db" {
-  source       = "terraform-google-modules/network/google//modules/firewall-rules"
+  source  = "terraform-google-modules/network/google//modules/firewall-rules"
+  version = "~> 6.0"
+
   project_id   = var.project_id
   network_name = module.hpc_vpc.network_self_link
   rules = [
@@ -197,35 +162,19 @@ module "firewall_allow_db" {
 }
 
 #Create a DMZ VPC to deploy compute engine for accessing HPC VM
-# module "dmz-vpc" {
-#   source           = "./modules/vpc"
-#   project_id       = var.project_id
-#   vpc_network_name = var.dmz_network_name
-#   subnets          = var.dmz_subnets
-#   depends_on       = [module.enable-apis, module.compute_engine_database_primary, module.firewall-allow-db]
-# }
 module "dmz_vpc" {
-  source           = "terraform-google-modules/network/google"
-  version          = "~> 6.0"
-  project_id       = var.project_id
-  network_name     = var.dmz_network_name
-  shared_vpc_host  = false
-  subnets          = var.dmz_subnets
+  source          = "terraform-google-modules/network/google"
+  version         = "~> 6.0"
+  project_id      = var.project_id
+  network_name    = var.dmz_network_name
+  shared_vpc_host = false
+  subnets         = var.dmz_subnets
 }
 
-# module "dmz_nat_gateway" {
-#   source        = "./modules/cloud_nat"
-#   project_id    = var.project_id
-#   router_name   = var.dmz_router_name
-#   network       = module.dmz-vpc.vpc_self_link
-#   router_region = var.dmz_router_region
-#   nat_name      = var.dmz_nat_name
-#   depends_on    = [module.enable-apis, module.dmz-vpc]
-# }
 module "dmz_nat_gateway" {
   source  = "terraform-google-modules/cloud-router/google"
   version = "~> 4.0"
-  project = var.project_id 
+  project = var.project_id
   name    = var.dmz_router_name
   network = module.dmz_vpc.network_self_link
   region  = var.dmz_router_region
@@ -256,51 +205,24 @@ module "compute_engine_dmz" {
   network              = module.dmz_vpc.network_self_link
   subnetwork           = module.dmz_vpc.subnets_names[0]
   use_existing_keyring = var.dmz_use_existing_keyring
-  keyring_name         = var.dmz_use_existing_keyring ? module.gce_kms.keyring_name : ""
+  keyring_name         = var.dmz_use_existing_keyring ? var.dmz_keyring_name : ""
   key_rotation_period  = var.key_rotation_period
-  depends_on           = [module.dmz_nat_gateway, module.gce_kms]
+  depends_on           = [module.dmz_nat_gateway]
 }
 
 #Peer HPC VPC and DMZ VPC
-# module "dmz-hpc-peering" {
-#   source        = "./modules/vpc_peering"
-#   local_network = module.dmz_vpc.vpc_self_link
-#   peer_network  = module.hpc-vpc.vpc_self_link
-#   depends_on    = [module.dmz_vpc, module.hpc-vpc]
-# }
 module "dmz_hpc_peering" {
-  source        = "terraform-google-modules/network/google//modules/network-peering"
+  source  = "terraform-google-modules/network/google//modules/network-peering"
+  version = "~> 6.0"
+
   local_network = module.dmz_vpc.network_self_link
   peer_network  = module.hpc_vpc.network_self_link
 }
 
-# module "firewall-allow-dmz" {
-#   source       = "./modules/firewall_rules"
-#   project_id   = var.project_id
-#   network_name = module.hpc-vpc.vpc_self_link
-#   rules = [
-#     {
-#       name                    = "dmz-firewall01"
-#       description             = "dmz firewall rules"
-#       direction               = "INGRESS"
-#       ranges                  = [var.dmz_subnets[0].subnet_ip]
-#       destination_ranges      = null
-#       source_tags             = null
-#       target_tags             = null
-#       source_service_accounts = null
-#       target_service_accounts = null
-#       priority                = null
-#       allow = [{
-#         protocol = "tcp"
-#         ports    = ["22"]
-#       }]
-#       deny       = []
-#       log_config = null
-#   }]
-#   depends_on = [module.dmz-hpc-peering]
-# }
 module "firewall_allow_dmz" {
-  source       = "terraform-google-modules/network/google//modules/firewall-rules"
+  source  = "terraform-google-modules/network/google//modules/firewall-rules"
+  version = "~> 6.0"
+
   project_id   = var.project_id
   network_name = module.hpc_vpc.network_self_link
   rules = [
@@ -327,19 +249,18 @@ module "firewall_allow_dmz" {
   ]
 }
 
-
 #Ensure Storage apis are secured with Private service connect
 module "vpc_servicecontrol" {
-  source                = "../vpc-sc"
-  project_id            = var.project_id
-  parent_id             = var.parent_id
-  policy_name           = var.policy_name
-  protected_project_ids = var.protected_project_ids
-  scopes                = var.scopes
-  members               = var.members
-  access_level_name     = var.access_level_name
-  perimeter_name        = var.perimeter_name
-  depends_on            = [module.dmz_hpc_peering]
+  source                    = "../vpc-sc"
+  parent_id                 = var.parent_id
+  policy_name               = var.policy_name
+  protected_project_numbers = [data.google_project.primary.number]
+  scopes                    = ["projects/${data.google_project.primary.number}"]
+  members                   = concat(var.members, ["serviceAccount:${data.google_project.primary.number}-compute@developer.gserviceaccount.com"])
+  access_level_name         = var.access_level_name
+  perimeter_name            = var.perimeter_name
+  # ingress_policies = var.vpc_sc_ingress_policies
+  depends_on = [module.dmz_hpc_peering]
 }
 
 #Create private service connect so HPC cluster can connect with input and output buckets
@@ -365,11 +286,6 @@ module "iap" {
   depends_on    = [module.private_service_connect]
 }
 
-# module "iam_deny" {
-#   source         = "./modules/iam"
-#   project_id     = var.project_id
-#   denypolicyname = var.deny_policy_name
-# }
 # The deny-compute-unsecur-api rule make sure that ITAR customers cannot suspend/resume instances and cannot use GetSerialPortOutput and GetScreenshot APIs
 resource "google_iam_deny_policy" "token_deny" {
   provider = google-beta

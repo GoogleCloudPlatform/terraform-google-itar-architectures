@@ -22,31 +22,33 @@ The [Service Account module](../service_account) can be used to provision a serv
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | access\_config | Access configurations, i.e. IPs via which the VM instance can be accessed via the Internet. The networking tier used for configuring this instance. This field can take the following values: PREMIUM or STANDARD. | <pre>list(object({<br>    nat_ip       = string<br>    network_tier = string<br>  }))</pre> | `[]` | no |
-| can\_ip\_forward | Enable IP forwarding, for NAT instances for example | `string` | `"false"` | no |
+| cmek\_project\_id | CMEK project id. | `string` | n/a | yes |
 | compute\_service\_account | The Google service account ID. | `string` | `""` | no |
 | create\_key | If you want to use an create a key | `bool` | `true` | no |
+| deletion\_protection | Enable deletion protection on this instance. Note: you must disable deletion protection before removing the resource, or the instance cannot be deleted and the Terraform run will not complete successfully. | `bool` | n/a | yes |
 | disk\_encryption\_key | The self link of the encryption key that is stored in Google Cloud KMS to use to encrypt all the disks on this instance | `string` | `""` | no |
-| disk\_size\_gb | Boot disk size in GB | `string` | `"100"` | no |
-| disk\_type | Boot disk type, can be either pd-ssd, local-ssd, or pd-standard | `string` | `"pd-standard"` | no |
-| instance\_prefix | Name prefix for the instance template | `string` | `"instance-template-"` | no |
+| disk\_size\_gb | Boot disk size in GB | `string` | n/a | yes |
+| disk\_type | Boot disk type, can be either pd-ssd or pd-standard | `string` | `"pd-standard"` | no |
+| instance\_name | Name of the instance. | `string` | n/a | yes |
+| instance\_prefix | Name prefix for the instance template | `string` | n/a | yes |
 | key\_name | Name to be used for KMS Key for CMEK | `string` | `"key"` | no |
-| key\_rotation\_period | Rotation period in seconds to be used for KMS Key | `string` | `"7776000s"` | no |
-| keyring\_name | Name to be used for KMS Keyring for CMEK | `string` | `"keyring-compute"` | no |
+| key\_rotation\_period | Rotation period in seconds to be used for KMS Key | `string` | n/a | yes |
+| keyring\_name | Name to be used for KMS Keyring for CMEK.  set (use\_existing\_keyring) to false if using this varaible | `string` | n/a | yes |
 | labels | Labels provided as a map | `map(string)` | `{}` | no |
-| machine\_type | Machine type to create, e.g. n1-standard-1 | `string` | `"n1-standard-1"` | no |
-| metadata | Metadata provided as a map | `map(string)` | `{}` | no |
-| network | The name or self\_link of the network to attach this interface to. Use network attribute for Legacy or Auto subnetted networks and subnetwork for custom subnetted networks. | `string` | `""` | no |
-| num\_instances | Number of instances to create. | `string` | `"1"` | no |
+| machine\_type | Machine type to create. Note that the instance image must support Confidential VMs | `string` | n/a | yes |
+| metadata | Metadata provided as a map | `map(string)` | <pre>{<br>  "enable-oslogin": true,<br>  "serial-port-enable": false<br>}</pre> | no |
+| network | The name or self\_link of the network to attach this interface to. Use network attribute for Legacy or Auto subnetted networks and subnetwork for custom subnetted networks. | `string` | n/a | yes |
+| num\_instances | Number of instances to create. | `string` | n/a | yes |
 | project\_id | The GCP project ID | `string` | n/a | yes |
-| region | Region where the instance template should be created. | `string` | `"us-east1"` | no |
-| roles\_list | roles list for the service account | `list(string)` | `[]` | no |
-| sa\_prefix | Name prefix for the service account | `string` | `"default"` | no |
-| source\_image | Source disk image. If neither source\_image nor source\_image\_family is specified, defaults to the latest public CentOS image. | `string` | `""` | no |
-| startup\_script | User startup script to run when instances spin up | `string` | `""` | no |
-| subnetwork | The name of the subnetwork to attach this interface to. The subnetwork must exist in the same region this instance will be created in. Either network or subnetwork must be provided. | `string` | `""` | no |
-| tags | Network tags, provided as a list | `list(string)` | n/a | yes |
-| terraform\_service\_account | Service account email of the account to impersonate to run Terraform. | `string` | n/a | yes |
-| use\_existing\_keyring | If you want to use an existing keyring and don't create a new one -> true | `bool` | `false` | no |
+| region | Region where the instance template should be created. | `string` | n/a | yes |
+| roles\_list | roles list for the service account | `list(string)` | <pre>[<br>  "roles/compute.osAdminLogin"<br>]</pre> | no |
+| sa\_prefix | Name prefix for the service account | `string` | n/a | yes |
+| source\_image | Source disk image. Note that the instance image must support Confidential VMs. | `string` | n/a | yes |
+| source\_image\_project | Source disk image project. Note that the instance image must support Confidential VMs. | `string` | n/a | yes |
+| srv\_roles\_list | roles list for the service account at project level | `list(string)` | <pre>[<br>  "roles/iam.serviceAccountUser",<br>  "roles/compute.instanceAdmin.v1",<br>  "roles/storage.admin"<br>]</pre> | no |
+| subnetwork | The name of the subnetwork to attach this interface to. The subnetwork must exist in the same region this instance will be created in. Either network or subnetwork must be provided. | `string` | n/a | yes |
+| tags | Network tags, provided as a list | `list(string)` | <pre>[<br>  "dmz"<br>]</pre> | no |
+| use\_existing\_keyring | If you want to use an existing keyring and don't create a new one -> true | `bool` | n/a | yes |
 | zone | Zone where the instances should be created. If not specified, instances will be spread across available zones in the region. | `string` | `null` | no |
 
 ## Outputs
