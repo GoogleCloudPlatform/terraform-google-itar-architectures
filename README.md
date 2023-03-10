@@ -1,52 +1,20 @@
-# terraform-google-itar-architectures
+# ITAR-Aligned Google Cloud Architectures
 
 ## Description
-### tagline
-This is an auto-generated module.
+The modules in this Terraform blueprint show how to implement common architectures aligned with ITAR compliance requirements. 
+The following architectures are available in the [modules](./modules/) directory:
+- [ITAR HPC Workload](./modules/itar-hpc-workload/)
 
-### detailed
-This module was generated from [terraform-google-module-template](https://github.com/terraform-google-modules/terraform-google-module-template/), which by default generates a module that simply creates a GCS bucket. As the module develops, this README should be updated.
-
-The resources/services/activations/deletions that this module will create/trigger are:
-
-- Create a GCS bucket with the provided name
-
-### preDeploy
-To deploy this blueprint you must have an active billing account and billing permissions.
+See the following documentation for more information on specific requirements for adhering to ITAR on Google Cloud. 
 
 ## Documentation
-- [Hosting a Static Website](https://cloud.google.com/storage/docs/hosting-static-website)
+- [Google Cloud: Restrictions and limitations for ITAR](https://cloud.google.com/assured-workloads/docs/itar-restrictions-limitations)
 
 ## Usage
-
-Basic usage of this module is as follows:
-
-```hcl
-module "itar_architectures" {
-  source  = "terraform-google-modules/itar-architectures/google"
-  version = "~> 0.1"
-
-  project_id  = "<PROJECT ID>"
-  bucket_name = "gcs-test-bucket"
-}
-```
-
-Functional examples are included in the
-[examples](./examples/) directory.
+See specific usage examples for each of the following architectures in the [examples](./examples/) directory:
+- [ITAR HPC Workload Example](./examples/itar_hpc_workload_example/)
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-## Inputs
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| bucket\_name | The name of the bucket to create | `string` | n/a | yes |
-| project\_id | The project ID to deploy to | `string` | n/a | yes |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| bucket\_name | Name of the bucket |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
@@ -63,10 +31,7 @@ The following dependencies must be available:
 
 ### Service Account
 
-A service account with the following roles must be used to provision
-the resources of this module:
-
-- Storage Admin: `roles/storage.admin`
+Refer to the documentation for individual submodules in the [modules](./modules/) directory for specific IAM requirements.
 
 The [Project Factory module][project-factory-module] and the
 [IAM module][iam-module] may be used in combination to provision a
@@ -77,7 +42,20 @@ service account with the necessary roles applied.
 A project with the following APIs enabled must be used to host the
 resources of this module:
 
-- Google Cloud Storage JSON API: `storage-api.googleapis.com`
+- `cloudresourcemanager.googleapis.com`
+- `iam.googleapis.com`
+- `compute.googleapis.com`
+- `vpcaccess.googleapis.com`
+- `storage-component.googleapis.com`
+- `storage-api.googleapis.com`
+- `orgpolicy.googleapis.com`
+- `serviceusage.googleapis.com`
+- `dns.googleapis.com`
+- `cloudkms.googleapis.com`
+- `domains.googleapis.com`
+- `iamcredentials.googleapis.com`
+- `iap.googleapis.com`
+- `accesscontextmanager.googleapis.com`
 
 The [Project Factory module][project-factory-module] can be used to
 provision a project with the necessary APIs enabled.

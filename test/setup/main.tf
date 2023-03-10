@@ -63,6 +63,5 @@ module "project" {
     "iamcredentials.googleapis.com",
     "iap.googleapis.com",
     "accesscontextmanager.googleapis.com",
-    # "storage.googleapis.com"
   ]
 }
