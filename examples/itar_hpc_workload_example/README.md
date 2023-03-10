@@ -1,6 +1,6 @@
-# Simple Example
+# ITAR-Aligned HPC Workload Example
 
-This example illustrates how to use the `itar-architectures` module.
+This example illustrates how to use the [`itar-hpc-workload`](../../modules/itar-hpc-workload/) module.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
