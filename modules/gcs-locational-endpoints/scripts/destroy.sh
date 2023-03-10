@@ -19,6 +19,6 @@ echo "Using gcloud from $GCLOUD_LOCATION"
 
 gsutil rm -r gs://"$1"
 gsutil rm -r gs://"$2"
-gsutil kms authorize -k projects/"$6"/locations/"$3"/keyRings/"$4"/cryptoKeys/"$5" -p "$7"
-gcloud kms keys versions destroy 1 --location="$3" --keyring="$4" --key="$5" --project="$6"
+# gsutil kms authorize -k projects/"$6"/locations/"$3"/keyRings/"$4"/cryptoKeys/"$5" -p "$7"
+# gcloud kms keys versions destroy 1 --location="$3" --keyring="$4" --key="$5" --project="$6"
 
