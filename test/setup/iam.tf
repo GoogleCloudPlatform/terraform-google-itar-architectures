@@ -18,6 +18,14 @@ locals {
   int_required_roles = [
     "roles/owner"
   ]
+  int_required_roles_kms = [
+    "roles/cloudkms.admin"
+  ]
+  int_required_roles_org = [
+    "roles/resourcemanager.organizationAdmin",
+    "roles/iam.denyAdmin",
+    "roles/accesscontextmanager.policyAdmin",
+  ]
 }
 
 resource "google_service_account" "int_test" {
@@ -27,11 +35,27 @@ resource "google_service_account" "int_test" {
 }
 
 resource "google_project_iam_member" "int_test" {
-  count = length(local.int_required_roles)
+  for_each = toset(local.int_required_roles)
 
   project = module.project.project_id
-  role    = local.int_required_roles[count.index]
+  role    = each.value
   member  = "serviceAccount:${google_service_account.int_test.email}"
+}
+
+resource "google_project_iam_member" "int_test_kms_proj" {
+  for_each = toset(local.int_required_roles_kms)
+
+  project = local.assured_workload_cmek_project_number
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.int_test.email}"
+}
+
+resource "google_organization_iam_member" "int_test_org" {
+  for_each = toset(local.int_required_roles_org)
+
+  org_id = var.org_id
+  role   = each.value
+  member = "serviceAccount:${google_service_account.int_test.email}"
 }
 
 resource "google_service_account_key" "int_test" {

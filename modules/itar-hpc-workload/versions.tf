@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-output "project_id" {
-  value = module.project.project_id
-}
-
-output "org_id" {
-  value = var.org_id
-}
-
-output "sa_key" {
-  value     = google_service_account_key.int_test.private_key
-  sensitive = true
-}
-
-output "sa_email" {
-  value = google_service_account.int_test.email
-}
-
-output "assured_workload_folder_id" {
-  value = local.assured_workload_folder_id
-}
-
-output "assured_workload_cmek_project_id" {
-  value = data.google_projects.cmek_project.projects[0].project_id
+terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 3.45"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 3.45"
+    }
+  }
 }

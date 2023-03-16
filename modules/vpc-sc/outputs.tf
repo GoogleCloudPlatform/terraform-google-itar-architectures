@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-module "itar_architectures" {
-  source = "../.."
+output "policy_id" {
+  description = "Resource name of the AccessPolicy."
+  value       = google_access_context_manager_access_policy.access_policy.name
+}
 
-  project_id  = var.project_id
-  bucket_name = var.bucket_name
+output "policy_name" {
+  description = "Name of the parent policy"
+  value       = var.policy_name
+}
+
+output "access_level_name" {
+  description = "Access level name of the Access Policy."
+  value       = var.access_level_name
 }
