@@ -21,7 +21,7 @@ data "google_project" "primary" {
 
 module "storage_kms" {
   source  = "terraform-google-modules/kms/google"
-  version = "2.2.1"
+  version = "2.2.3"
 
   project_id = var.cmek_project_id
   keyring    = var.gcs_kms_ring_name
@@ -47,7 +47,7 @@ module "gcs_locational_endpoints" {
 
 module "gce_kms" {
   source  = "terraform-google-modules/kms/google"
-  version = "2.2.1"
+  version = "2.2.3"
 
   project_id = var.cmek_project_id
   keyring    = var.gce_keyring_name
