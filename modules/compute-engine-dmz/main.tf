@@ -94,7 +94,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 #This module will create an instance template which will be used to create compute engine DMZ. This template enables confidential and shielded security on VM, enables/disables nested virtualization, enable/disables IP forwarding and provide other security controls
 module "instance_template" {
   source  = "terraform-google-modules/vm/google//modules/instance_template"
-  version = "~> 8.0.0"
+  version = "~> 10.1.0"
 
   project_id  = var.project_id
   name_prefix = var.instance_prefix
@@ -134,7 +134,7 @@ module "instance_template" {
 #This module will create the Compute Engine DMZ virtual machine from instance template and also enables deletion protection functionality on the instance
 module "compute_instance" {
   source  = "terraform-google-modules/vm/google//modules/compute_instance"
-  version = "~> 8.0.0"
+  version = "~> 10.1.0"
 
   instance_template   = module.instance_template.self_link
   hostname            = var.instance_name

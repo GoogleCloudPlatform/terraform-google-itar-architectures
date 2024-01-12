@@ -21,7 +21,7 @@
 
 module "googleapis" {
   source      = "terraform-google-modules/cloud-dns/google"
-  version     = "~> 4.2.1"
+  version     = "~> 5.2.0"
   project_id  = var.project_id
   type        = "private"
   name        = "${local.dns_code}apis"
