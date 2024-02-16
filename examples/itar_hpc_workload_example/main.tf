@@ -15,7 +15,8 @@
  */
 
 module "itar_hpc_workload" {
-  source = "../../modules/itar-hpc-workload"
+  source  = "GoogleCloudPlatform/itar-architectures/google//modules/itar-hpc-workload"
+  version = "~> REPLACE-AFTER-RELEASE"
 
   project_id      = var.project_id
   cmek_project_id = var.assured_workload_cmek_project_id
