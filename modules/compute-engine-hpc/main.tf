@@ -85,7 +85,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 
 module "instance_template" {
   source  = "terraform-google-modules/vm/google//modules/instance_template"
-  version = "~> 8.0.0"
+  version = "~> 11.1.0"
 
   name_prefix        = var.instance_prefix
   labels             = var.labels
@@ -128,7 +128,7 @@ module "instance_template" {
 
 module "compute_instance" {
   source  = "terraform-google-modules/vm/google//modules/compute_instance"
-  version = "~> 8.0.0"
+  version = "~> 11.1.0"
 
   instance_template   = module.instance_template.self_link
   hostname            = var.instance_name
