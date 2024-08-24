@@ -40,7 +40,7 @@ data "google_projects" "cmek_project" {
 
 module "project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 14.0"
+  version = "~> 16.0"
 
   name              = "ci-itar-architectures"
   random_project_id = "true"
