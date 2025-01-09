@@ -26,7 +26,7 @@ resource "google_access_context_manager_access_policy" "access_policy" {
 #This module will be used to add/give access to members who will not be restricted by the access level context policy and will be able to access the storage service API and storage buckets
 module "access_level_members" {
   source  = "terraform-google-modules/vpc-service-controls/google//modules/access_level"
-  version = "~> 5.0.0"
+  version = "~> 6.2.0"
 
   policy  = google_access_context_manager_access_policy.access_policy.name
   name    = "access_members"
@@ -36,7 +36,7 @@ module "access_level_members" {
 #This will create a reguler service perimeter for google cloud storage API, which will restrict allusers to access storage buckets and only give access to selected members
 module "regular_service_perimeter_1" {
   source  = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version = "~> 5.0.0"
+  version = "~> 6.2.0"
 
   policy              = google_access_context_manager_access_policy.access_policy.name
   perimeter_name      = var.perimeter_name
