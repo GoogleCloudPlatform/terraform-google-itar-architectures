@@ -70,7 +70,7 @@ module "hpc_vpc" {
 #Create a NAT gateway 
 module "hpc_nat_gateway" {
   source  = "terraform-google-modules/cloud-router/google"
-  version = "~> 4.0"
+  version = "~> 7.0"
   project = var.project_id
   name    = var.hpc_router_name
   network = module.hpc_vpc.network_self_link
@@ -174,7 +174,7 @@ module "dmz_vpc" {
 
 module "dmz_nat_gateway" {
   source  = "terraform-google-modules/cloud-router/google"
-  version = "~> 4.0"
+  version = "~> 7.0"
   project = var.project_id
   name    = var.dmz_router_name
   network = module.dmz_vpc.network_self_link
