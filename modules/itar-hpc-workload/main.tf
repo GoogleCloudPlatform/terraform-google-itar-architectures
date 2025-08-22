@@ -59,7 +59,7 @@ module "gce_kms" {
 # Create a VPC to deploy the HPC ready vm
 module "hpc_vpc" {
   source          = "terraform-google-modules/network/google"
-  version         = "~> 6.0"
+  version         = "~> 11.0"
   project_id      = var.project_id
   network_name    = var.hpc_network_name
   shared_vpc_host = false
@@ -135,7 +135,7 @@ module "compute_engine_database_primary" {
 #Enable firewall rules that allow users to access HPC VM and Postgress
 module "firewall_allow_db" {
   source  = "terraform-google-modules/network/google//modules/firewall-rules"
-  version = "~> 6.0"
+  version = "~> 11.0"
 
   project_id   = var.project_id
   network_name = module.hpc_vpc.network_self_link
@@ -165,7 +165,7 @@ module "firewall_allow_db" {
 #Create a DMZ VPC to deploy compute engine for accessing HPC VM
 module "dmz_vpc" {
   source          = "terraform-google-modules/network/google"
-  version         = "~> 6.0"
+  version         = "~> 11.0"
   project_id      = var.project_id
   network_name    = var.dmz_network_name
   shared_vpc_host = false
@@ -214,7 +214,7 @@ module "compute_engine_dmz" {
 #Peer HPC VPC and DMZ VPC
 module "dmz_hpc_peering" {
   source  = "terraform-google-modules/network/google//modules/network-peering"
-  version = "~> 6.0"
+  version = "~> 11.0"
 
   local_network = module.dmz_vpc.network_self_link
   peer_network  = module.hpc_vpc.network_self_link
@@ -222,7 +222,7 @@ module "dmz_hpc_peering" {
 
 module "firewall_allow_dmz" {
   source  = "terraform-google-modules/network/google//modules/firewall-rules"
-  version = "~> 6.0"
+  version = "~> 11.0"
 
   project_id   = var.project_id
   network_name = module.hpc_vpc.network_self_link
