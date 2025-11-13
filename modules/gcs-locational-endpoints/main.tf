@@ -16,7 +16,7 @@
 
 module "gcloud" {
   source                 = "terraform-google-modules/gcloud/google"
-  version                = "~> 3.1"
+  version                = "~> 4.0"
   platform               = "linux"
   create_cmd_entrypoint  = "${path.module}/scripts/create.sh"
   create_cmd_body        = "${var.gcs_kms_ring_name} ${var.gcs_kms_key_name} ${var.project_id} ${var.location_endpoint} ${var.input_bucket_name} ${var.output_bucket_name} ${var.cmek_project_id} ${var.lifecycle_file}"
