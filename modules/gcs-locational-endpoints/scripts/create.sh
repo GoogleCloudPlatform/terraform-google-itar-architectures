@@ -20,14 +20,14 @@ echo "Using gcloud from $GCLOUD_LOCATION"
 gcloud --version
 # gcloud kms keyrings create "$1" --location "$4" --project "$7"
 # gcloud kms keys create "$2" --keyring "$1" --location "$4" --purpose "encryption" --project "$7"
-# gsutil kms authorize -k projects/"$7"/locations/"$4"/keyRings/"$1"/cryptoKeys/"$2" -p "$3"
+# gcloud storage service-agent --authorize-cmek=projects/"$7"/locations/"$4"/keyRings/"$1"/cryptoKeys/"$2" --project "$3"
 
-gsutil -o 'Credentials:gs_json_host=us-central1-storage.googleapis.com' mb -b on -c standard -k projects/"$7"/locations/"$4"/keyRings/"$1"/cryptoKeys/"$2" -l "$4" -p "$3" gs://"$5"
-# gsutil versioning set on gs://"$5"
-# gsutil lifecycle set lifecycle.json gs://"$5"
+gcloud storage buckets create gs://"$5" --uniform-bucket-level-access --default-storage-class standard --default-encryption-key projects/"$7"/locations/"$4"/keyRings/"$1"/cryptoKeys/"$2" --location "$4" --project "$3"
+# gcloud storage buckets update --versioning gs://"$5"
+# gcloud storage buckets update --lifecycle-file=lifecycle.json gs://"$5"
 
-# gsutil -o'Credentials:gs_json_host=us-central1-storage.googleapis.com' mb -b on -c standard -k projects/"$7"/locations/"$4"/keyRings/"$1"/cryptoKeys/"$2" -l "$4" -p "$3"  gs://"$6"
-# gsutil versioning set on gs://"$6"
-# gsutil lifecycle set lifecycle.json gs://"$5"
+# gcloud storage buckets create gs://"$6" --uniform-bucket-level-access --default-storage-class standard --default-encryption-key projects/"$7"/locations/"$4"/keyRings/"$1"/cryptoKeys/"$2" --location "$4" --project "$3"
+# gcloud storage buckets update --versioning gs://"$6"
+# gcloud storage buckets update --lifecycle-file=lifecycle.json gs://"$5"
 
-#gsutil -o"'"Credentials:gs_json_host="$3"-storage.googleapis.com"'" mb -b on -c standard -k "$1" -l "$3" -p "$2"  gs://"$4"
+#gcloud storage buckets create gs://"$4" --uniform-bucket-level-access --default-storage-class standard --default-encryption-key "$1" --location "$3" --project "$2"
