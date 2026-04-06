@@ -1,11 +1,11 @@
 # ITAR-Aligned Google Cloud Architectures
 
 ## Description
-The modules in this Terraform blueprint show how to implement common architectures aligned with ITAR compliance requirements. 
+The modules in this Terraform blueprint show how to implement common architectures aligned with ITAR compliance requirements.
 The following architectures are available in the [modules](./modules/) directory:
 - [ITAR HPC Workload](./modules/itar-hpc-workload/)
 
-See the following documentation for more information on specific requirements for adhering to ITAR on Google Cloud. 
+See the following documentation for more information on specific requirements for adhering to ITAR on Google Cloud.
 
 ## Documentation
 - [Google Cloud: Restrictions and limitations for ITAR](https://cloud.google.com/assured-workloads/docs/itar-restrictions-limitations)
