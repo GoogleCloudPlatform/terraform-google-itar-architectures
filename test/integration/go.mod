@@ -1,11 +1,8 @@
 module github.com/terraform-google-modules/itar-architectures/test/integration
 
-go 1.18
+go 1.24
 
-require (
-	github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.3.0
-	github.com/stretchr/testify v1.8.1
-)
+require github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test v0.3.0
 
 require (
 	cloud.google.com/go v0.83.0 // indirect
@@ -23,7 +20,6 @@ require (
 	github.com/go-openapi/swag v0.19.5 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/golang/snappy v0.0.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/gruntwork-io/terratest v0.40.7 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
@@ -37,13 +33,14 @@ require (
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
-	github.com/klauspost/compress v1.13.0 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/mailru/easyjson v0.7.0 // indirect
 	github.com/mattn/go-zglob v0.0.2-0.20190814121620-e3c945676326 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.2-0.20210217184823-a52172cd2f64 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/tidwall/gjson v1.12.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
